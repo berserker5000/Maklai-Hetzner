@@ -21,7 +21,7 @@ spec:
           command:
             - ./cluster-autoscaler
             - --cloud-provider=hetzner
-            - --nodes=1:5:pool-name
+            - --nodes=1:5:master
             - --skip-nodes-with-local-storage=false
             - --stderrthreshold=info
             - --v=4

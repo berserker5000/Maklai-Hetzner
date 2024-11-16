@@ -2,6 +2,9 @@ resource "hcloud_server" "master_node" {
   name        = "master"
   server_type = "cx22"
   image       = "ubuntu-24.04"
+  labels = {
+    "master":"true"
+  }
   location    = "nbg1"
   ssh_keys = [hcloud_ssh_key.default.name]
   firewall_ids = [hcloud_firewall.firewall.id]
@@ -41,7 +44,7 @@ resource "hcloud_server" "master_node" {
       - sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
       - sudo chown $(id -u):$(id -g) $HOME/.kube/config
       - echo "export KUBECONFIG=/etc/kubernetes/admin.conf" >> /root/.bashrc
-      - kubectl apply -f https://github.com/flannel-io/flannel/releases/latest/download/kube-flannel.yml
+      - kubectl apply -f https://raw.githubusercontent.com/projectcalico/calico/v3.26.0/manifests/calico.yaml
       - kubectl taint nodes $(hostname) node-role.kubernetes.io/control-plane:NoSchedule-
       - sleep 10
       - reboot now
