@@ -320,7 +320,10 @@ subjects:
   namespace: ingress-nginx
 ---
 apiVersion: v1
-data: null
+data:
+  use-forwarded-headers: "true"
+  compute-full-forwarded-for: "true"
+  use-proxy-protocol: "true"
 kind: ConfigMap
 metadata:
   labels:
@@ -335,6 +338,9 @@ metadata:
 apiVersion: v1
 kind: Service
 metadata:
+  annotations:
+    load-balancer.hetzner.cloud/name: "nginx"
+    load-balancer.hetzner.cloud/location: "nbg1"
   labels:
     app.kubernetes.io/component: controller
     app.kubernetes.io/instance: ingress-nginx
@@ -484,6 +490,9 @@ spec:
           requests:
             cpu: 100m
             memory: 90Mi
+          limits:
+            cpu: 500m
+            memory: 512Mi
         securityContext:
           allowPrivilegeEscalation: false
           capabilities:
@@ -648,7 +657,7 @@ webhooks:
       name: ingress-nginx-controller-admission
       namespace: ingress-nginx
       path: /networking/v1/ingresses
-      port: 443
+      port: 80
   failurePolicy: Fail
   matchPolicy: Equivalent
   name: validate.nginx.ingress.kubernetes.io

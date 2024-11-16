@@ -1,5 +1,14 @@
 variable "hcloud_token" {
-  sensitive = true
   description = "Hetzner token"
-  default = "Chq6uRZUtCgSI7U85saC2MZHVhViZMNbOUQ7VkoNFgreIafDb6NZJUyIZJHEGKns"
+}
+variable "personal_ips" {
+  type        = list(string)
+  description = "List your external IP to access instance via SSH"
+  default     = ["0.0.0.0/0"]
+}
+
+variable "project_name" {
+  type        = string
+  description = "Project name"
+  default     = "maklai"
 }

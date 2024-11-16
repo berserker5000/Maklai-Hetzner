@@ -1,8 +1,66 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: hcloud-cloud-controller-manager-role
+rules:
+  - apiGroups: [""]
+    resources:
+      - "configmaps"
+      - "endpoints"
+      - "pods"
+      - "nodes"
+      - "services"
+    verbs:
+      - "get"
+      - "list"
+      - "watch"
+  - apiGroups: [""]
+    resources:
+      - "events"
+    verbs:
+      - "create"
+      - "patch"
+  - apiGroups: [""]
+    resources:
+      - "nodes/status"
+    verbs:
+      - "patch"
+  - apiGroups: [""]
+    resources:
+      - "endpoints"
+    verbs:
+      - "get"
+      - "list"
+      - "create"
+      - "update"
+  - apiGroups: ["coordination.k8s.io"]
+    resources:
+      - "leases"
+    verbs:
+      - "get"
+      - "list"
+      - "watch"
+      - "create"
+      - "update"
+---
 apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: hcloud-cloud-controller-manager
   namespace: kube-system
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: hcloud-cloud-controller-manager-binding
+subjects:
+  - kind: ServiceAccount
+    name: hcloud-cloud-controller-manager
+    namespace: kube-system
+roleRef:
+  kind: ClusterRole
+  name: hcloud-cloud-controller-manager-role
+  apiGroup: rbac.authorization.k8s.io
 ---
 apiVersion: v1
 kind: Secret
@@ -10,7 +68,8 @@ metadata:
   name: hcloud
   namespace: kube-system
 data:
-  token: "Chq6uRZUtCgSI7U85saC2MZHVhViZMNbOUQ7VkoNFgreIafDb6NZJUyIZJHEGKns"
+  token: "Q2hxNnVSWlV0Q2dTSTdVODVzYUMyTVpIVmhWaVpNTmJPVVE3VmtvTkZncmVJYWZEYjZOWkpVeUlaSkhFR0tucw=="
+  network: "MTAzNTg2MzU="
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -31,3 +90,32 @@ spec:
       containers:
         - name: hcloud-cloud-controller-manager
           image: hetznercloud/hcloud-cloud-controller-manager:v1.12.0
+          args:
+            - "--allow-untagged-cloud"
+            - "--cloud-provider=hcloud"
+          env:
+            - name: HCLOUD_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: hcloud
+                  key: token
+            - name: NODE_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
+          resources:
+            limits:
+              memory: 512Mi
+              cpu: "1"
+            requests:
+              memory: 256Mi
+              cpu: "0.2"
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            runAsNonRoot: true
+            runAsUser: 1000
+      volumes:
+        - name: hcloud-secret
+          secret:
+            secretName: hcloud

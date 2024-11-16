@@ -4,12 +4,12 @@ resource "tls_private_key" "ssh_key" {
 }
 
 resource "local_file" "private_key" {
-  filename = "${path.module}/maklai"
+  filename = "${path.module}/${var.project_name}"
   content  = tls_private_key.ssh_key.private_key_pem
 }
 
 resource "hcloud_ssh_key" "default" {
-  name      = "key"
+  name       = "key"
   public_key = tls_private_key.ssh_key.public_key_openssh
 }
 
