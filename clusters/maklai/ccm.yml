@@ -1,0 +1,33 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: hcloud-cloud-controller-manager
+  namespace: kube-system
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: hcloud
+  namespace: kube-system
+data:
+  token: "Chq6uRZUtCgSI7U85saC2MZHVhViZMNbOUQ7VkoNFgreIafDb6NZJUyIZJHEGKns"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hcloud-cloud-controller-manager
+  namespace: kube-system
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: hcloud-cloud-controller-manager
+  template:
+    metadata:
+      labels:
+        app: hcloud-cloud-controller-manager
+    spec:
+      serviceAccountName: hcloud-cloud-controller-manager
+      containers:
+        - name: hcloud-cloud-controller-manager
+          image: hetznercloud/hcloud-cloud-controller-manager:v1.12.0

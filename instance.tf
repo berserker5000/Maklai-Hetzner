@@ -42,7 +42,8 @@ resource "hcloud_server" "master_node" {
       - sudo chown $(id -u):$(id -g) $HOME/.kube/config
       - echo "export KUBECONFIG=/etc/kubernetes/admin.conf" >> /root/.bashrc
       - kubectl apply -f https://github.com/flannel-io/flannel/releases/latest/download/kube-flannel.yml
-      - sleep 30
+      - kubectl taint nodes $(hostname) node-role.kubernetes.io/control-plane:NoSchedule-
+      - sleep 10
       - reboot now
   EOT
 
